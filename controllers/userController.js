@@ -38,29 +38,36 @@ export const register = catchAsyncError(async ( req,res,next)=>{
 export const login = catchAsyncError(async ( req,res,next)=>{
        
         const {email,password} = req.body;
-          console.log(email,password);
+
+         console.log(email,password);
+         
         if(!email || !password) return next(new ErrorHandler("Please Enter All Feilds",400));
-
         let user = await User.findOne({ email }).select("+password");
-
         if(! user) return next(new ErrorHandler("Incorrect Email or Password"),401);
 
         const isMatch = await user.comparePassword(password);
+          
+        // console.log(email,password);
 
-        if(! isMatch) return next(new ErrorHandler("Incorrect hello Email or Password"),401);
+        if(! isMatch) return next(new ErrorHandler("Incorrect  Email or Password"),401);
 
         sendToken(res,user,`Welcome Back ${user.name}`,200);
 });
 
-export const logout = catchAsyncError(async(req,res,next) =>{
-          
-         res.status(200).cookie("token",null,{
-                 expires: new Date(Date.now()),
-         }).json({
-                 success:true,
-                 message:"Logged Out Successfully",
-         })
-});
+export const logout = catchAsyncError(async (req, res, next) => {
+        res
+          .status(200)
+          .cookie("token", null, {
+            expires: new Date(Date.now()),
+            httpOnly: true,
+            secure: true,
+            sameSite: "none",
+          })
+          .json({
+            success: true,
+            message: "Logged Out Successfully",
+          });
+      });
 
 export const getMyProfile = catchAsyncError(async(req,res,next) =>{
           
@@ -102,38 +109,38 @@ export const updateProfile = catchAsyncError(async(req,res,next) =>{
          
         if(name) user.name=name;
         if(email) user.email=email;
-
+        console.log(user,email);
         await user.save();
-
          res.status(200).json({
                  success:true,
                  message:"Profile Updated Successfully",
          })
 });
 
-export const updateprofilepicture = catchAsyncError(async (req,res,next) => {
+export const updateprofilepicture = catchAsyncError(async (req, res, next) => {
+  const file = req.file;
+
+  const user = await User.findById(req.user._id);
+
+  const fileUri = getDataUri(file);
+  const mycloud = await cloudinary.v2.uploader.upload(fileUri.content);
+
+  await cloudinary.v2.uploader.destroy(user.avatar.public_id);
+
+  user.avatar = {
+    public_id: mycloud.public_id,
+    url: mycloud.secure_url,
+  };
+
+  await user.save();
           
-        // cloudinary to do 
-               
-        const file = req.file;
-
-         const user =   await User.findById(req.user._id);
-        const fileUri = getDataUri(file);
-        const mycloud = await cloudinary.v2.uploader.upload(fileUri.content);
-
-        await cloudinary.v2.uploader.destroy(user.avatar.public_id);
-
-        user.avatar = {
-                 public_id : mycloud.public_id,
-                 url : mycloud.secure_url,
-        };
-
-
-         res.status(200).json({
-                 success:true,
-                 message:"Profile Picture Updated Successfully",
-         })
+    console.log("updated");
+  res.status(200).json({
+    success: true,
+    message: "Profile Picture Updated Successfully",
+  });
 });
+
 
 export const forgetPassword = catchAsyncError(async (req, res, next) => {
         const { email } = req.body;
@@ -197,10 +204,11 @@ export const forgetPassword = catchAsyncError(async (req, res, next) => {
       });
       
       export const addToPlaylist = catchAsyncError(async (req,res,next) =>{
-                  
+              
+            
              const user = await User.findById(req.user._id);
-             const course =  await Course.findById(req.body._id);
-
+             const course =  await Course.findById(req.body.id);
+             
              if(!course) return next(new ErrorHandler("Invalid Course Id",404));
 
                const itemExist= user.playlist.find((item) => {
@@ -221,29 +229,23 @@ export const forgetPassword = catchAsyncError(async (req, res, next) => {
                  message:"Added to playlist ",
              })
       });
-      export const removeFromPlaylist = catchAsyncError(async (req,res,next) =>{
-                    
-              //  res.send("NICE");
-        const user = await User.findById(req.user._id);
-        const course =  await Course.findById(req.query.id);
-         console.log(req.query.id);
-         console.log(course);
+      
+export const removeFromPlaylist = catchAsyncError(async (req, res, next) => {
+  const user =    await User.findById(req.user._id);
+  const course = await Course.findById(req.query.id);
+  if (!course) return next(new ErrorHandler("Invalid Course Id", 404));
 
-        if(!course) return next(new ErrorHandler("Invalid Course Id",404));
- 
-        const newPlaylist= user.playlist.filter(item =>{
-                  if(item.course.toString() !== course._id.toString()) return item;
-        });
+  const newPlaylist = user.playlist.filter((item) => {
+    if (item.course.toString() !== course._id.toString()) return item;
+  });
 
-         user.playlist=newPlaylist;
-
-         await user.save();
-
-           res.status(200).json({
-                    success:true,
-                    message:"Remove From Playlist",
-           });
-      });
+  user.playlist = newPlaylist;
+  await user.save();
+  res.status(200).json({
+    success: true,
+    message: "Removed From Playlist",
+  });
+});
 
 
       export const getAllUsers = catchAsyncError(async (req,res,next) =>{
@@ -317,6 +319,7 @@ export const forgetPassword = catchAsyncError(async (req, res, next) => {
       });
 
       User.watch().on("change", async () => {
+        
         const stats = await Stats.find({}).sort({ createdAt: "desc" }).limit(1);
          
         const subscription = await User.find({ "subscription.status": "active" });
@@ -324,5 +327,5 @@ export const forgetPassword = catchAsyncError(async (req, res, next) => {
         stats[0].subscription = subscription.length;
         stats[0].createdAt = new Date(Date.now());
       
-        await stats[0].save();
+       if(stats) await stats[0].save();
       });

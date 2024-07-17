@@ -20,6 +20,21 @@ const schema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  educators : [
+      {
+          EducatorName : {
+              type : String ,
+          },
+          Rating : {
+              type : Number ,
+              default : 0,
+          },
+          NumberOfRaters : {
+              type : Number ,
+              default : 0,
+          }
+      }
+  ],
 });
 
 export const Stats = mongoose.model("Stats", schema);

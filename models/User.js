@@ -27,6 +27,11 @@ const schema = new mongoose.Schema({
     enum: ["admin", "user"],
     default: "user",
   },
+   
+  isEducator : {
+    type : Boolean ,
+    default : false,
+  },   
 
   subscription: {
     id: String,

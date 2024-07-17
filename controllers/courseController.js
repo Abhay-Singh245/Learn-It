@@ -26,9 +26,9 @@ export const getAllCourses = catchAsyncError(async (req, res, next) => {
 });
 
 export const createCourse = catchAsyncError(async (req, res, next) => {
-  const { title, description, category, createdBy } = req.body;
+  const { title, description, category, createdBy ,educatedBy} = req.body;
 
-  if (!title || !description || !category || !createdBy)
+  if (!title || !description || !category || !createdBy || !educatedBy)
     return next(new ErrorHandler("Please add all fields", 400));
 
   const file = req.file;
@@ -42,6 +42,7 @@ export const createCourse = catchAsyncError(async (req, res, next) => {
     description,
     category,
     createdBy,
+    educatedBy,
     poster: {
       public_id: mycloud.public_id,
       url: mycloud.secure_url,
@@ -120,7 +121,7 @@ export const deleteCourse = catchAsyncError(async (req, res, next) => {
     });
   }
 
-  await course.remove();
+  await course.deleteOne();
 
   res.status(200).json({
     success: true,
@@ -129,7 +130,7 @@ export const deleteCourse = catchAsyncError(async (req, res, next) => {
 });
 
 export const deleteLecture = catchAsyncError(async (req, res, next) => {
-  const { courseId, lectureId } = req.query;
+   const { courseId, lectureId } = req.query;
 
   const course = await Course.findById(courseId);
   if (!course) return next(new ErrorHandler("Course not found", 404));

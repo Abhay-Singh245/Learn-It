@@ -1,6 +1,6 @@
 
 import express from "express";
-import { contact, courseRequest, getDashboardStats } from "../controllers/otherController.js";
+import { contact, courseRequest, getDashboardStats, getTopCourses } from "../controllers/otherController.js";
 import { authorizeAdmin, isAuthenticated } from "../middlewares/auth.js";
 
 const router = express.Router();
@@ -10,5 +10,6 @@ const router = express.Router();
  router.route("/courserequest").post(courseRequest);
 
  router.route("/admin/stats").get(isAuthenticated,authorizeAdmin,getDashboardStats);
+ router.route("/gettopcourses").get( isAuthenticated ,getTopCourses);
 
  export default router;

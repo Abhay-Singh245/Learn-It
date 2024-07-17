@@ -13,12 +13,15 @@ export const buySubscription = catchAsyncError(async (req, res, next) => {
       return next(new ErrorHandler("Admin can't buy subscription", 400));
   
     const plan_id = process.env.PLAN_ID || "plan_NdQigEdsjaOiGa";
-  
+      
     const subscription = await instance.subscriptions.create({
       plan_id,
       customer_notify: 1,
       total_count: 12,
     });
+
+      
+     console.log(subscription);
   
     user.subscription.id = subscription.id;
   
@@ -69,6 +72,7 @@ export const buySubscription = catchAsyncError(async (req, res, next) => {
   
 
   export const getRazorPayKey = catchAsyncError(async (req, res, next) => {
+    //  console.log(process.env.RAZORPAY_API_KEY) ;
     res.status(200).json({
       success: true,
       key: process.env.RAZORPAY_API_KEY,

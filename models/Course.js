@@ -62,6 +62,18 @@ const schema = new mongoose.Schema({
     type: String,
     required: [true, "Enter Course Creator Name"],
   },
+  educatedBy: {
+    type: String,
+    required: [true, "Enter Educator Name"],
+  },
+  ratingValue : {
+      type : Number,
+      default : 0,
+  },
+  NumberOfRater : {
+      type : Number,
+      default : 0,
+  },
   createdAt: {
     type: Date,
     default: Date.now,

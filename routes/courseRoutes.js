@@ -11,8 +11,8 @@ const router = express.Router();
 
 // router.get("/courses",getAllCourses);
 router.route("/courses").get(getAllCourses);
-router.route("/createcourse").post(isAuthenticated, authorizeSubscribers, singleUpload, createCourse);
-router.route("/course/:id").get(isAuthenticated, authorizeAdmin, getCourseLectures)
+router.route("/createcourse").post(isAuthenticated, authorizeSubscribers,authorizeAdmin, singleUpload, createCourse);
+router.route("/course/:id").get(isAuthenticated,  getCourseLectures)
                            .post(isAuthenticated,authorizeAdmin, singleUpload, addLecture)
                            .delete(isAuthenticated,authorizeAdmin,deleteCourse);
 

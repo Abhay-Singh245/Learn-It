@@ -8,7 +8,7 @@ const router = express.Router();
 
 router.route("/register").post(singleUpload,register);
 router.route("/login").post(login);
-router.route("/logout").post(logout);
+router.route("/logout").get(logout);
 router.route("/me").get(isAuthenticated, getMyProfile).delete(isAuthenticated,deleteMyProfile);
 router.route("/changepassword").put(isAuthenticated, changePassword);
 router.route("/updateprofile").put(isAuthenticated, updateProfile);
@@ -18,7 +18,7 @@ router.route("/resetpassword/:token").put(resetPassword);
 router.route("/addtoplaylist").post(isAuthenticated,addToPlaylist);
 router.route("/removefromplaylist").delete(isAuthenticated,removeFromPlaylist);
 router.route("/admin/users").get(isAuthenticated,authorizeAdmin,getAllUsers);
-router.route("/admin/users/:id")
+router.route("/admin/user/:id")
 .put(isAuthenticated,authorizeAdmin,updateUserRole)
 .delete(isAuthenticated,authorizeAdmin,deleteUser);
 
